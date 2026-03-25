@@ -11,3 +11,4 @@ wheels/
 /.idea
 /input
 **/**.pt
+**/**.mp4
