@@ -4,4 +4,12 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "numpy>=2.4.3",
+    "opencv-python>=4.13.0.92",
+    "pandas>=3.0.1",
+    "ultralytics>=8.4.26",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "python-dotenv>=1.0.0",
+]
