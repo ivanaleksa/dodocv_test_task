@@ -1,21 +1,15 @@
-from typing import Annotated
-
-from pydantic import BeforeValidator, Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# тип для цвета
+BgrColor = tuple[int, int, int]
 
-# helping func - string "B,G,R" → tuple[int, int, int]
-def _parse_bgr(value: object) -> tuple[int, int, int]:
-    if isinstance(value, (tuple, list)):
-        b, g, r = value
-        return (int(b), int(g), int(r))
-    parts = str(value).split(",")
+
+def _parse_bgr(value: str) -> BgrColor:
+    parts = value.split(",")
     if len(parts) != 3:
         raise ValueError(f"Цвет должен быть в формате 'B,G,R', получено: {value!r}")
-    return (int(parts[0]), int(parts[1]), int(parts[2]))
-
-
-BgrColor = Annotated[tuple[int, int, int], BeforeValidator(_parse_bgr)]
+    return int(parts[0]), int(parts[1]), int(parts[2])
 
 
 class Settings(BaseSettings):
@@ -23,6 +17,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
+        populate_by_name=True,
     )
 
     yolo_model: str = Field(
@@ -57,13 +52,25 @@ class Settings(BaseSettings):
         description="Кадров подряд с человеком -> стол считается занятым",
     )
 
-    output_video: str = Field(default="output.mp4")
-    report_file: str = Field(default="report.txt")
-    events_csv: str = Field(default="events.csv")
+    output_video: str = "output.mp4"
+    report_file: str = "report.txt"
+    events_csv: str = "events.csv"
 
     color_empty: BgrColor = Field(default=(0, 220, 0))
     color_occupied: BgrColor = Field(default=(0, 0, 220))
     color_approach: BgrColor = Field(default=(0, 200, 255))
+
+    @field_validator(
+        "color_empty",
+        "color_occupied",
+        "color_approach",
+        mode="before",
+    )
+    @classmethod
+    def parse_color(cls, v):
+        if isinstance(v, str):
+            return _parse_bgr(v)
+        return v
 
 
 settings = Settings()
